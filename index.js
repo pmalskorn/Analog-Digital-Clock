@@ -12,26 +12,30 @@ let clockRadius;
 let canvas = document.getElementById("myCanvas");
 let ctx = canvas.getContext("2d");
 
+let clocks = new Array(clocksHorizontal * clocksVertical);
+
 function clearHand(x, y, diffX, diffY) {
 
     if (diffX >= 0 && diffY >= 0) {
-        ctx.clearRect(x - handThickness, y - handThickness, diffX + handThickness * 2, diffY + handThickness *2);
+        ctx.clearRect(x - handThickness, y - handThickness, diffX + handThickness * 2, diffY + handThickness * 2);
     } else if (diffX <= 0 && diffY >= 0) {
-        ctx.clearRect(x + handThickness, y - handThickness, diffX - handThickness * 2, diffY + handThickness *2);
+        ctx.clearRect(x + handThickness, y - handThickness, diffX - handThickness * 2, diffY + handThickness * 2);
     } else if (diffX <= 0 && diffY <= 0) {
-        ctx.clearRect(x + handThickness, y + handThickness, diffX - handThickness * 2, diffY - handThickness *2);
-    } else if (diffX >= 0 && diffY >= 0) {
-        ctx.clearRect(x - handThickness, y + handThickness, diffX + handThickness * 2, diffY - handThickness *2);
+        ctx.clearRect(x + handThickness, y + handThickness, diffX - handThickness * 2, diffY - handThickness * 2);
+    } else if (diffX >= 0 && diffY <= 0) {
+        ctx.clearRect(x - handThickness, y + handThickness, diffX + handThickness * 2, diffY - handThickness * 2);
     }
 }
 
 function clearClockHands(clock) {
-    let diffX = clock.lastHourPos.x - clock.x;
-    let diffY = clock.lastHourPos.y - clock.y;
-    clearHand(clock.x, clock.y, diffX, diffY);
-    diffX = clock.lastMinutePos.x - clock.x;
-    diffY = clock.lastMinutePos.y - clock.y;
-    clearHand(clock.x, clock.y, diffX, diffY);
+    if (clock.lastHourPos != undefined && clock.lastMinutePos != undefined) {
+        let diffX = clock.lastHourPos.x - clock.x;
+        let diffY = clock.lastHourPos.y - clock.y;
+        clearHand(clock.x, clock.y, diffX, diffY);
+        diffX = clock.lastMinutePos.x - clock.x;
+        diffY = clock.lastMinutePos.y - clock.y;
+        clearHand(clock.x, clock.y, diffX, diffY);
+    }
 }
 
 function getCirclePositionByAngle(x, y, angle) {
@@ -62,12 +66,19 @@ function drawCircle(x, y) {
 }
 
 function drawClocks() {
+    let id = 0;
     for (let i = 0; i < clocksHorizontal; i++) {
         for (let j = 0; j < clocksVertical; j++) {
-            drawCircle(clockWidth / 2 + i * clockWidth, clockWidth / 2 + j * clockWidth);
+            let x = clockWidth / 2 + i * clockWidth;
+            let y = clockWidth / 2 + j * clockWidth;
+            drawCircle(x, y);
+            clocks[id] = new Clock(x, y);
+            id++;
         }
     }
+    console.log(clocks.length)
 }
+
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -94,10 +105,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     drawClocks();
-    let clock1 = new Clock(clockWidth / 2, clockWidth / 2)
-    drawHands(clock1, 270, 0);
-    setTimeout(function () {
-        console.log("del");
-        clearClockHands(clock1);
-    }, 1000);
+    clock1 = new Clock(clockWidth / 2, clockWidth / 2)
+
+    setInterval(function () {
+        clocks.forEach(clock => {
+            clearClockHands(clock);
+            drawHands(clock, clock.hour, clock.min);
+            clock.incAngle();
+        })
+    }, 100);
 }, false);
