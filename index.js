@@ -42,14 +42,12 @@ function getCirclePositionByAngle(x, y, angle) {
     return { x: retx, y: rety };
 }
 
-function drawHands(clock, hoursAngle, minutesAngle) {
-    //offset for starting so 0 degree is the top
-    hoursAngle += 270;
-    minutesAngle += 270;
-
+function drawHands(clock) {
     ctx.lineWidth = handThickness;
-    let hour = getCirclePositionByAngle(clock.x, clock.y, hoursAngle);
-    let minute = getCirclePositionByAngle(clock.x, clock.y, minutesAngle);
+
+    // 270 offset for starting so 0 degree is the top
+    let hour = getCirclePositionByAngle(clock.x, clock.y, clock.currentValueHour + 270);
+    let minute = getCirclePositionByAngle(clock.x, clock.y, clock.currentValueMinute + 270);
     clock.lastHourPos = hour;
     clock.lastMinutePos = minute;
     ctx.beginPath();
@@ -81,20 +79,26 @@ function drawClocks() {
 
 function drawBorder() {
     for (let i = 0; i < clocksHorizontal; i++) {
-        drawHands(clocks[i][0], 225, 225);
-        drawHands(clocks[i][clocksVertical - 1], 225, 225);
+        clocks[i][0].setpointHour = 225;
+        clocks[i][0].setpointMinute = 225;
+        clocks[i][clocksVertical - 1].setpointHour = 225;
+        clocks[i][clocksVertical - 1].setpointMinute = 225;
     }
     for (let i = 0; i < clocksVertical; i++) {
-        drawHands(clocks[0][i], 225, 225);
-        drawHands(clocks[(clocksHorizontal - 1) / 2][i], 225, 225);
-        drawHands(clocks[clocksHorizontal - 1][i], 225, 225);
+        clocks[0][i].setpointHour = 225;
+        clocks[(clocksHorizontal - 1) / 2][i].setpointHour = 225;
+        clocks[clocksHorizontal - 1][i].setpointHour = 225;
+        clocks[0][i].setpointMinute = 225;
+        clocks[(clocksHorizontal - 1) / 2][i].setpointMinute = 225;
+        clocks[clocksHorizontal - 1][i].setpointMinute = 225;
     }
 }
 
 function drawCharacter(x, y, char) {
     let characterInfos = CHARACTERS[char];
     characterInfos.forEach(clock => {
-        drawHands(clocks[clock.x + x][clock.y + y], clock.hour, clock.minute);
+        clocks[clock.x + x][clock.y + y].setpointHour = clock.hour;
+        clocks[clock.x + x][clock.y + y].setpointMinute = clock.minute;
     });
 }
 
@@ -124,11 +128,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     drawClocks();
 
-    drawCharacter(1, 1, 1);
-    drawCharacter(4, 1, 2);
-    drawCharacter(8, 1, 3);
-    drawCharacter(11, 1, 0);
-    drawBorder();
+    setInterval(function () {
+        clocks.forEach(verticalRow => {
+            verticalRow.forEach(clock => {
+                clearClockHands(clock);
+                drawHands(clock)
+            });
+        });
+    }, 100);
+
+    setInterval(function () {
+
+        drawCharacter(1, 1, example)
+        drawCharacter(4, 1, example)
+        drawCharacter(8, 1, example)
+        drawCharacter(11, 1, example)
+        drawBorder();
+        example++;
+        if (example > 9) {
+            example = 0;
+        }
+
+
+    }, 8000);
 
 
 }, false);
+
+let example = 0;
