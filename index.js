@@ -8,14 +8,12 @@ const handpadding = 7;
 let clockWidth;
 let clockHeight;
 let clockRadius;
-
 let canvas = document.getElementById("myCanvas");
 let ctx = canvas.getContext("2d");
+let clocks = createArray(clocksHorizontal, clocksVertical);
 
-let clocks = new Array(clocksHorizontal * clocksVertical);
 
 function clearHand(x, y, diffX, diffY) {
-
     if (diffX >= 0 && diffY >= 0) {
         ctx.clearRect(x - handThickness, y - handThickness, diffX + handThickness * 2, diffY + handThickness * 2);
     } else if (diffX <= 0 && diffY >= 0) {
@@ -45,6 +43,10 @@ function getCirclePositionByAngle(x, y, angle) {
 }
 
 function drawHands(clock, hoursAngle, minutesAngle) {
+    //offset for starting so 0 degree is the top
+    hoursAngle += 270;
+    minutesAngle += 270;
+
     ctx.lineWidth = handThickness;
     let hour = getCirclePositionByAngle(clock.x, clock.y, hoursAngle);
     let minute = getCirclePositionByAngle(clock.x, clock.y, minutesAngle);
@@ -66,17 +68,34 @@ function drawCircle(x, y) {
 }
 
 function drawClocks() {
-    let id = 0;
     for (let i = 0; i < clocksHorizontal; i++) {
         for (let j = 0; j < clocksVertical; j++) {
             let x = clockWidth / 2 + i * clockWidth;
             let y = clockWidth / 2 + j * clockWidth;
             drawCircle(x, y);
-            clocks[id] = new Clock(x, y);
-            id++;
+            clocks[i][j] = new Clock(x, y);
         }
     }
     console.log(clocks.length)
+}
+
+function drawBorder() {
+    for (let i = 0; i < clocksHorizontal; i++) {
+        drawHands(clocks[i][0], 225, 225);
+        drawHands(clocks[i][clocksVertical - 1], 225, 225);
+    }
+    for (let i = 0; i < clocksVertical; i++) {
+        drawHands(clocks[0][i], 225, 225);
+        drawHands(clocks[(clocksHorizontal - 1) / 2][i], 225, 225);
+        drawHands(clocks[clocksHorizontal - 1][i], 225, 225);
+    }
+}
+
+function drawCharacter(x, y, char) {
+    let characterInfos = CHARACTERS[char];
+    characterInfos.forEach(clock => {
+        drawHands(clocks[clock.x + x][clock.y + y], clock.hour, clock.minute);
+    });
 }
 
 
@@ -103,15 +122,13 @@ document.addEventListener('DOMContentLoaded', () => {
     var ctx = canvas.getContext('2d');
     ctx.scale(dpr, dpr);
 
-
     drawClocks();
-    clock1 = new Clock(clockWidth / 2, clockWidth / 2)
 
-    setInterval(function () {
-        clocks.forEach(clock => {
-            clearClockHands(clock);
-            drawHands(clock, clock.hour, clock.min);
-            clock.incAngle();
-        })
-    }, 100);
+    drawCharacter(1, 1, 1);
+    drawCharacter(4, 1, 2);
+    drawCharacter(8, 1, 3);
+    drawCharacter(11, 1, 0);
+    drawBorder();
+
+
 }, false);
