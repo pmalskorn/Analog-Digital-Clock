@@ -1,3 +1,4 @@
+
 const clocksHorizontal = 15;
 const clocksVertical = 8;
 const clockBorderThickness = 3;
@@ -36,18 +37,10 @@ function clearClockHands(clock) {
     }
 }
 
-function getCirclePositionByAngle(x, y, angle) {
-    let retx = x + (clockRadius - handpadding) * Math.cos(angle * Math.PI / 180);
-    let rety = y + (clockRadius - handpadding) * Math.sin(angle * Math.PI / 180);
-    return { x: retx, y: rety };
-}
-
 function drawHands(clock) {
     ctx.lineWidth = handThickness;
-
-    // 270 offset for starting so 0 degree is the top
-    let hour = getCirclePositionByAngle(clock.x, clock.y, clock.currentValueHour + 270);
-    let minute = getCirclePositionByAngle(clock.x, clock.y, clock.currentValueMinute + 270);
+    let hour = getCirclePositionByAngle(clock.x, clock.y, clock.getCurrentHourAngleWithOffset());
+    let minute = getCirclePositionByAngle(clock.x, clock.y, clock.getCurrentMinuteAngleWithOffset());
     clock.lastHourPos = hour;
     clock.lastMinutePos = minute;
     ctx.beginPath();
@@ -102,6 +95,14 @@ function drawCharacter(x, y, char) {
     });
 }
 
+function redrawHands(clock) {
+    if (clock.redraw) {
+        clearClockHands(clock);
+        drawHands(clock)
+        clock.redraw = false;
+    }
+}
+
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -131,12 +132,20 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(function () {
         clocks.forEach(verticalRow => {
             verticalRow.forEach(clock => {
-                clearClockHands(clock);
-                drawHands(clock)
+                redrawHands(clock);
             });
         });
     }, 100);
 
+    drawCharacter(1, 1, example)
+    drawCharacter(4, 1, example)
+    drawCharacter(8, 1, example)
+    drawCharacter(11, 1, example)
+    drawBorder();
+    example++;
+    if (example > 9) {
+        example = 0;
+    }
     setInterval(function () {
 
         drawCharacter(1, 1, example)
