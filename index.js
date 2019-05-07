@@ -70,6 +70,8 @@ function redrawHands(clock) {
     if (clock.redraw) {
         clock.hand.forEach(hand => {
             clearClockHand(hand);
+        });
+        clock.hand.forEach(hand => {
             drawHand(hand);
         });
         clock.redraw = false;
@@ -79,10 +81,8 @@ function redrawHands(clock) {
 
 function drawBorder() {
     for (let i = 0; i < clocksHorizontal; i++) {
-        clocks[i][0].setpointHour = 225;
-        clocks[i][0].setpointMinute = 225;
-        clocks[i][clocksVertical - 1].setpointHour = 225;
-        clocks[i][clocksVertical - 1].setpointMinute = 225;
+        clocks[i][j].setHourSetpoint(225);
+        clocks[i][clocksVertical - 1]
     }
     for (let i = 0; i < clocksVertical; i++) {
         clocks[0][i].setpointHour = 225;
@@ -134,33 +134,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 redrawHands(clock);
             });
         });
-    }, 100);
+    }, 50);
 
-    drawCharacter(1, 1, example);
-    //drawCharacter(4, 1, example)
-    //drawCharacter(8, 1, example)
-    //drawCharacter(11, 1, example)
     //drawBorder();
-    //example++;
-    //if (example > 9) {
-    //    example = 0;
-    //}
-    /*setInterval(function () {
-
+    setInterval(function () {
         drawCharacter(1, 1, example)
         drawCharacter(4, 1, example)
         drawCharacter(8, 1, example)
         drawCharacter(11, 1, example)
-        drawBorder();
         example++;
         if (example > 9) {
             example = 0;
         }
 
 
-    }, 8000);*/
+    }, 8000);
 
 
 }, false);
 
-let example = 6;
+let example = 0;
