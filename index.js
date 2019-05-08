@@ -13,44 +13,6 @@ let canvas = document.getElementById("myCanvas");
 let ctx = canvas.getContext("2d");
 let clocks = createArray(clocksHorizontal, clocksVertical);
 
-
-function clearHand(x, y, diffX, diffY) {
-    if (diffX >= 0 && diffY >= 0) {
-        ctx.clearRect(x - handThickness, y - handThickness, diffX + handThickness * 2, diffY + handThickness * 2);
-    } else if (diffX <= 0 && diffY >= 0) {
-        ctx.clearRect(x + handThickness, y - handThickness, diffX - handThickness * 2, diffY + handThickness * 2);
-    } else if (diffX <= 0 && diffY <= 0) {
-        ctx.clearRect(x + handThickness, y + handThickness, diffX - handThickness * 2, diffY - handThickness * 2);
-    } else if (diffX >= 0 && diffY <= 0) {
-        ctx.clearRect(x - handThickness, y + handThickness, diffX + handThickness * 2, diffY - handThickness * 2);
-    }
-}
-
-function clearClockHands(clock) {
-    if (clock.lastHourPos != undefined && clock.lastMinutePos != undefined) {
-        let diffX = clock.lastHourPos.x - clock.x;
-        let diffY = clock.lastHourPos.y - clock.y;
-        clearHand(clock.x, clock.y, diffX, diffY);
-        diffX = clock.lastMinutePos.x - clock.x;
-        diffY = clock.lastMinutePos.y - clock.y;
-        clearHand(clock.x, clock.y, diffX, diffY);
-    }
-}
-
-function drawHands(clock) {
-    ctx.lineWidth = handThickness;
-    let hour = getCirclePositionByAngle(clock.x, clock.y, clock.getCurrentHourAngleWithOffset());
-    let minute = getCirclePositionByAngle(clock.x, clock.y, clock.getCurrentMinuteAngleWithOffset());
-    clock.lastHourPos = hour;
-    clock.lastMinutePos = minute;
-    ctx.beginPath();
-    ctx.moveTo(clock.x, clock.y);
-    ctx.lineTo(hour.x, hour.y);
-    ctx.moveTo(clock.x, clock.y);
-    ctx.lineTo(minute.x, minute.y);
-    ctx.stroke();
-}
-
 function drawCircle(x, y) {
     ctx.lineWidth = clockBorderThickness;
     ctx.beginPath();
@@ -70,37 +32,83 @@ function drawClocks() {
     console.log(clocks.length)
 }
 
-function drawBorder() {
-    for (let i = 0; i < clocksHorizontal; i++) {
-        clocks[i][0].setpointHour = 225;
-        clocks[i][0].setpointMinute = 225;
-        clocks[i][clocksVertical - 1].setpointHour = 225;
-        clocks[i][clocksVertical - 1].setpointMinute = 225;
-    }
-    for (let i = 0; i < clocksVertical; i++) {
-        clocks[0][i].setpointHour = 225;
-        clocks[(clocksHorizontal - 1) / 2][i].setpointHour = 225;
-        clocks[clocksHorizontal - 1][i].setpointHour = 225;
-        clocks[0][i].setpointMinute = 225;
-        clocks[(clocksHorizontal - 1) / 2][i].setpointMinute = 225;
-        clocks[clocksHorizontal - 1][i].setpointMinute = 225;
+
+function clearSquare(x, y, diffX, diffY) {
+    if (diffX >= 0 && diffY >= 0) {
+        ctx.clearRect(x - handThickness, y - handThickness, diffX + handThickness * 2, diffY + handThickness * 2);
+    } else if (diffX <= 0 && diffY >= 0) {
+        ctx.clearRect(x + handThickness, y - handThickness, diffX - handThickness * 2, diffY + handThickness * 2);
+    } else if (diffX <= 0 && diffY <= 0) {
+        ctx.clearRect(x + handThickness, y + handThickness, diffX - handThickness * 2, diffY - handThickness * 2);
+    } else if (diffX >= 0 && diffY <= 0) {
+        ctx.clearRect(x - handThickness, y + handThickness, diffX + handThickness * 2, diffY - handThickness * 2);
     }
 }
 
-function drawCharacter(x, y, char) {
-    let characterInfos = CHARACTERS[char];
-    characterInfos.forEach(clock => {
-        clocks[clock.x + x][clock.y + y].setpointHour = clock.hour;
-        clocks[clock.x + x][clock.y + y].setpointMinute = clock.minute;
-    });
+function clearClockHand(hand) {
+    if (hand.lastEndPosition != null) {
+        let diffX = hand.lastEndPosition.x - hand.startPosition.x;
+        let diffY = hand.lastEndPosition.y - hand.startPosition.y;
+        clearSquare(hand.startPosition.x, hand.startPosition.y, diffX, diffY);
+    }
+}
+
+function drawHand(hand) {
+    ctx.lineWidth = handThickness;
+    let pos = getCirclePositionByAngle(
+        hand.startPosition.x,
+        hand.startPosition.y,
+        hand.currentValue + 270);
+    hand.lastEndPosition = pos;
+    ctx.beginPath();
+    ctx.moveTo(hand.startPosition.x, hand.startPosition.y);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
 }
 
 function redrawHands(clock) {
     if (clock.redraw) {
-        clearClockHands(clock);
-        drawHands(clock)
+        clock.hand.forEach(hand => {
+            clearClockHand(hand);
+        });
+        clock.hand.forEach(hand => {
+            drawHand(hand);
+        });
         clock.redraw = false;
     }
+}
+
+function drawBorder() {
+    for (let i = 0; i < clocksHorizontal; i++) {
+        clocks[i][0].setBothSetpoints(225);
+        clocks[i][clocksVertical - 1].setBothSetpoints(225);
+    }
+    for (let i = 0; i < clocksVertical; i++) {
+        clocks[0][i].setBothSetpoints(225);
+        clocks[(clocksHorizontal - 1) / 2][i].setBothSetpoints(225);
+        clocks[clocksHorizontal - 1][i].setBothSetpoints(225);
+    }
+
+}
+
+function drawTime(){
+    drawBorder();
+    let time = new Date().toLocaleTimeString("de").split(":");
+    console.log((parseInt(time[0], 10) - 1));
+    let hh = time[0];
+    let mm = time[1];
+    drawCharacter(1, 1, hh.charAt(0));
+    drawCharacter(4, 1, hh.charAt(1));
+    drawCharacter(8, 1, mm.charAt(0));
+    drawCharacter(11, 1, mm.charAt(1));
+}
+
+function drawCharacter(x, y, char) {
+    let characterInfos = CHARACTERS[char];
+    characterInfos.forEach(clockInfo => {
+        clocks[clockInfo.x + x][clockInfo.y + y].setHourSetpoint(clockInfo.hour);
+        clocks[clockInfo.x + x][clockInfo.y + y].setMinuteSetpoint(clockInfo.minute);
+    });
 }
 
 
@@ -129,39 +137,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     drawClocks();
 
+    drawTime();
+
     setInterval(function () {
         clocks.forEach(verticalRow => {
             verticalRow.forEach(clock => {
                 redrawHands(clock);
             });
         });
-    }, 100);
-
-    drawCharacter(1, 1, example)
-    drawCharacter(4, 1, example)
-    drawCharacter(8, 1, example)
-    drawCharacter(11, 1, example)
-    drawBorder();
-    example++;
-    if (example > 9) {
-        example = 0;
-    }
+    }, 50);
     setInterval(function () {
-
-        drawCharacter(1, 1, example)
-        drawCharacter(4, 1, example)
-        drawCharacter(8, 1, example)
-        drawCharacter(11, 1, example)
-        drawBorder();
-        example++;
-        if (example > 9) {
-            example = 0;
-        }
+        drawTime();
+    }, 60000);
 
 
-    }, 8000);
 
 
 }, false);
 
-let example = 0;
+let example = 1;
