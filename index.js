@@ -95,7 +95,7 @@ function drawTime(){
     drawBorder();
     let time = new Date().toLocaleTimeString("de").split(":");
     console.log((parseInt(time[0], 10) - 1));
-    let hh = "0"+(parseInt(time[0], 10) - 1);
+    let hh = time[0];
     let mm = time[1];
     drawCharacter(1, 1, hh.charAt(0));
     drawCharacter(4, 1, hh.charAt(1));
