@@ -245,6 +245,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(function () {
         currentState = (currentState + 1) % 3;
         prepare = true;
-    }, 15000);
+    }, 30000);
 
 }, false);
