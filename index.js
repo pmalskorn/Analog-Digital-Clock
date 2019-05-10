@@ -29,7 +29,6 @@ function drawClocks() {
             clocks[i][j] = new Clock(x, y);
         }
     }
-    console.log(clocks.length)
 }
 
 
@@ -68,10 +67,10 @@ function drawHand(hand) {
 
 function redrawHands(clock) {
     if (clock.redraw) {
-        clock.hand.forEach(hand => {
+        clock.hands.forEach(hand => {
             clearClockHand(hand);
         });
-        clock.hand.forEach(hand => {
+        clock.hands.forEach(hand => {
             drawHand(hand);
         });
         clock.redraw = false;
@@ -91,16 +90,58 @@ function drawBorder() {
 
 }
 
-function drawTime(){
+function allClocksReady() {
+    let allReady = true;
+    clocks.forEach(verticalRow => {
+        verticalRow.forEach(clock => {
+            if (clock.state != CLOCK_STATE.READY) {
+                allReady = false;
+            }
+        });
+    });
+    return allReady;
+}
+
+function drawTime() {
     drawBorder();
     let time = new Date().toLocaleTimeString("de").split(":");
-    console.log((parseInt(time[0], 10) - 1));
     let hh = time[0];
     let mm = time[1];
     drawCharacter(1, 1, hh.charAt(0));
     drawCharacter(4, 1, hh.charAt(1));
     drawCharacter(8, 1, mm.charAt(0));
     drawCharacter(11, 1, mm.charAt(1));
+}
+
+function animation1() {
+    if (prepare) {
+        clocks.forEach(verticalRow => {
+            verticalRow.forEach(clock => {
+                clock.setHourSetpoint(0);
+                clock.setMinuteSetpoint(180);
+                clock.redraw = true;
+            });
+        });
+        prepare = false;
+    } else {
+        clocks.forEach(verticalRow => {
+            verticalRow.forEach(clock => {
+                clock.setHourPosition(clock.getHourSetpoint() + 2);
+                clock.setMinutePosition(clock.getMinuteSetpoint() + 2);
+                clock.redraw = true;
+            });
+        });
+    }
+}
+
+function animation2() {
+    clocks.forEach(verticalRow => {
+        verticalRow.forEach(clock => {
+            clock.setHourPosition(clock.getHourSetpoint() - 2);
+            clock.setMinutePosition(clock.getMinuteSetpoint() + 2);
+            clock.redraw = true;
+        });
+    });
 }
 
 function drawCharacter(x, y, char) {
@@ -111,6 +152,15 @@ function drawCharacter(x, y, char) {
     });
 }
 
+
+const STATE = {
+    TIME: 0,
+    ANIMATION_1: 1,
+    ANIMATION_2: 2
+}
+
+let currentState = STATE.ANIMATION_2;
+let prepare = true;
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -134,25 +184,36 @@ document.addEventListener('DOMContentLoaded', () => {
     canvas.height = rect.height * dpr;
     var ctx = canvas.getContext('2d');
     ctx.scale(dpr, dpr);
-
     drawClocks();
+    console.log("created");
 
-    drawTime();
+
 
     setInterval(function () {
+        if (allClocksReady()) {
+            switch (currentState) {
+                case STATE.TIME:
+                    drawTime();
+                    break;
+                case STATE.ANIMATION_1:
+                    animation1();
+                    break;
+                case STATE.ANIMATION_2:
+                    animation2();
+                    break;
+            }
+        }
         clocks.forEach(verticalRow => {
             verticalRow.forEach(clock => {
                 redrawHands(clock);
+                clock.tick();
             });
         });
     }, 50);
+
     setInterval(function () {
-        drawTime();
-    }, 60000);
-
-
-
+        currentState = (currentState + 1) % 3;
+        prepare = true;
+    }, 8000);
 
 }, false);
-
-let example = 1;
