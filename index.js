@@ -124,10 +124,10 @@ function animation1() {
         });
         prepare = false;
     } else {
-        clocks.forEach(verticalRow => {
-            verticalRow.forEach(clock => {
-                clock.setHourPosition(clock.getHourSetpoint() + 2);
-                clock.setMinutePosition(clock.getMinuteSetpoint() + 2);
+        clocks.forEach((verticalRow, i) => {
+            verticalRow.forEach((clock, j) => {
+                clock.setHourPosition(clock.getHourSetpoint() + Math.log10(i + j + 1));
+                clock.setMinutePosition(clock.getMinuteSetpoint() + Math.log10(i + j + 1));
                 clock.redraw = true;
             });
         });
@@ -135,13 +135,44 @@ function animation1() {
 }
 
 function animation2() {
-    clocks.forEach(verticalRow => {
-        verticalRow.forEach(clock => {
-            clock.setHourPosition(clock.getHourSetpoint() - 2);
-            clock.setMinutePosition(clock.getMinuteSetpoint() + 2);
-            clock.redraw = true;
+    if (prepare) {
+        clocks.forEach((verticalRow, i) => {
+            verticalRow.forEach((clock, j) => {
+                if(i % 2 == 0 && j % 2 == 0){
+                    clock.setHourSetpoint(90);
+                    clock.setMinuteSetpoint(180);
+                }
+                if(i % 2 == 1 && j % 2 == 0){
+                    clock.setHourSetpoint(180);
+                    clock.setMinuteSetpoint(270);
+                }
+                if(i % 2 == 0 && j % 2 == 1){
+                    clock.setHourSetpoint(0);
+                    clock.setMinuteSetpoint(90);
+                }
+                if(i % 2 == 1 && j % 2 == 1){
+                    clock.setHourSetpoint(0);
+                    clock.setMinuteSetpoint(270);
+                }
+            });
         });
-    });
+        prepare = false;
+    } else {
+        clocks.forEach((verticalRow, i) => {
+            verticalRow.forEach((clock, j) => {
+                if(i % 2 == 0 && j % 2 == 0 || i % 2 == 1 && j % 2 == 1){
+                    clock.setHourPosition(clock.getHourSetpoint() + 2);
+                    clock.setMinutePosition(clock.getMinuteSetpoint() + 2);
+                    clock.redraw = true;
+                }
+                if(i % 2 == 0 && j % 2 == 1 || i % 2 == 1 && j % 2 == 0 ){
+                    clock.setHourPosition(clock.getHourSetpoint() - 2);
+                    clock.setMinutePosition(clock.getMinuteSetpoint() - 2);
+                    clock.redraw = true;
+                }
+            });
+        });
+    }
 }
 
 function drawCharacter(x, y, char) {
@@ -159,7 +190,7 @@ const STATE = {
     ANIMATION_2: 2
 }
 
-let currentState = STATE.ANIMATION_2;
+let currentState = STATE.TIME;
 let prepare = true;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -214,6 +245,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(function () {
         currentState = (currentState + 1) % 3;
         prepare = true;
-    }, 8000);
+    }, 15000);
 
 }, false);
