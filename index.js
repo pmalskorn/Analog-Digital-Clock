@@ -138,19 +138,19 @@ function animation2() {
     if (prepare) {
         clocks.forEach((verticalRow, i) => {
             verticalRow.forEach((clock, j) => {
-                if(i % 2 == 0 && j % 2 == 0){
+                if (i % 2 == 0 && j % 2 == 0) {
                     clock.setHourSetpoint(90);
                     clock.setMinuteSetpoint(180);
                 }
-                if(i % 2 == 1 && j % 2 == 0){
+                if (i % 2 == 1 && j % 2 == 0) {
                     clock.setHourSetpoint(180);
                     clock.setMinuteSetpoint(270);
                 }
-                if(i % 2 == 0 && j % 2 == 1){
+                if (i % 2 == 0 && j % 2 == 1) {
                     clock.setHourSetpoint(0);
                     clock.setMinuteSetpoint(90);
                 }
-                if(i % 2 == 1 && j % 2 == 1){
+                if (i % 2 == 1 && j % 2 == 1) {
                     clock.setHourSetpoint(0);
                     clock.setMinuteSetpoint(270);
                 }
@@ -160,12 +160,12 @@ function animation2() {
     } else {
         clocks.forEach((verticalRow, i) => {
             verticalRow.forEach((clock, j) => {
-                if(i % 2 == 0 && j % 2 == 0 || i % 2 == 1 && j % 2 == 1){
+                if (i % 2 == 0 && j % 2 == 0 || i % 2 == 1 && j % 2 == 1) {
                     clock.setHourPosition(clock.getHourSetpoint() + 2);
                     clock.setMinutePosition(clock.getMinuteSetpoint() + 2);
                     clock.redraw = true;
                 }
-                if(i % 2 == 0 && j % 2 == 1 || i % 2 == 1 && j % 2 == 0 ){
+                if (i % 2 == 0 && j % 2 == 1 || i % 2 == 1 && j % 2 == 0) {
                     clock.setHourPosition(clock.getHourSetpoint() - 2);
                     clock.setMinutePosition(clock.getMinuteSetpoint() - 2);
                     clock.redraw = true;
